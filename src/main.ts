@@ -33,6 +33,40 @@ const texLoader = new THREE.TextureLoader();
 const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
 
 /* ============================================================
+   First-load curtain — the plate draws itself while the hero's
+   textures arrive, then hands off to the real scene behind it.
+   Hooked here, before any texture load starts, so the manager
+   sees every item.
+   ============================================================ */
+{
+  const el = document.getElementById('loader');
+  const bar = el?.querySelector<HTMLElement>('.lf-b');
+  if (el && bar) {
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const START = performance.now();
+    const MIN_MS = calm ? 400 : 2200;  // long enough for the frame to close
+    const CAP_MS = 9000;               // never trap anyone behind a slow asset
+    let progress = 0;
+    const paint = () => bar.style.setProperty('--p', String(progress));
+    THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
+      progress = total ? loaded / total : 1;
+      paint();
+    };
+    // if nothing ever registered with the manager, don't hang on it
+    window.addEventListener('load', () => { if (progress === 0) { progress = 1; paint(); } });
+    const tick = () => {
+      const t = performance.now() - START;
+      if (t > CAP_MS || (progress >= 1 && t > MIN_MS)) {
+        progress = 1; paint();
+        el.classList.add('is-done');
+        setTimeout(() => el.classList.add('is-gone'), 1200);
+      } else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+}
+
+/* ============================================================
    Filmstrip
    ============================================================ */
 const chapterIds = ['hero', 'what', 'mission', 'cohort', 'courses', 'partners', 'start'];
@@ -475,6 +509,7 @@ const papers = sections.map((s) => s.querySelector<HTMLElement>('.paper-block'))
 const railLinks = [...document.querySelectorAll<HTMLAnchorElement>('.rail-chapters a')];
 const paperBlocks = [...document.querySelectorAll<HTMLElement>('.paper-block')]; // the footer is dark now
 const heroSection = document.getElementById('hero');
+const siteFooter = document.querySelector<HTMLElement>('.site-footer');
 
 type StageState = {
   active: number; strip: number; time: number;      // which video frame to show
@@ -610,7 +645,7 @@ function setupAnims() {
   document.querySelectorAll<HTMLElement>('.finale-cta').forEach((el) => anims.push({ el, kind: 'crashCta' }));
   document.querySelectorAll<HTMLElement>('.statement').forEach((el) => anims.push({ el, kind: 'statement', parts: splitWords(el, true) }));
   document.querySelectorAll<HTMLElement>('.definition, .lede').forEach((el) => anims.push({ el, kind: 'statement', parts: splitWords(el, false) }));
-  document.querySelectorAll<HTMLElement>('.feature, .principles li, .course-list li, .partner-slot, .footer-col, .footer-brand, .start-cta, .paper-figure')
+  document.querySelectorAll<HTMLElement>('.feature, .principles li, .course-list li, .partner-slot, .start-cta, .paper-figure')
     .forEach((el, i) => anims.push({ el, kind: 'rise', index: i }));
   const plate = document.querySelector<HTMLElement>('.hero-plate');
   if (plate) anims.push({ el: plate, kind: 'heroPlate' });
@@ -940,6 +975,10 @@ function raf(time: number) {
   document.body.dataset.surfaceTop = paperAt(window.innerHeight * 0.06) ? 'paper' : 'dark';
   document.body.dataset.surface = paperAt(window.innerHeight * 0.55) ? 'paper' : 'dark';
   document.body.dataset.surfaceBottom = paperAt(window.innerHeight * 0.94) ? 'paper' : 'dark';
+  // the rail repeats the footer's own links and legal line — retire it as the
+  // footer arrives so the two never sit on top of each other
+  const fr = siteFooter?.getBoundingClientRect();
+  document.body.dataset.atFooter = fr && fr.top < window.innerHeight * 0.92 ? 'on' : 'off';
 
   if (debugOn) {
     const s = st.strip >= 0 ? strips[st.strip] : null;

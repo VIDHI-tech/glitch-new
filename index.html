@@ -8,8 +8,60 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Imperial+Script&family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Loader — inlined because style.css ships with the JS bundle and would
+       arrive too late to paint the first frame. */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #111110;
+      display: grid; place-items: center;
+      transition: opacity 0.9s ease 0.15s;
+    }
+    /* the frame clears first, so the hero's own plate is never on screen at
+       the same time as the loader's copy of it */
+    #loader .loader-frame { transition: opacity 0.35s ease; }
+    #loader.is-done .loader-frame { opacity: 0; }
+    #loader.is-done { opacity: 0; pointer-events: none; transition: opacity 0.8s ease 0.32s; }
+    #loader.is-gone { display: none; }
+    .loader-frame {
+      position: relative;
+      width: min(46rem, 74vw); height: min(24rem, 42vh);
+      display: grid; place-items: center;
+    }
+    .loader-frame i {
+      position: absolute; background: rgba(244, 242, 234, 0.5);
+     }
+    .lf-t, .lf-b { left: 0; width: 100%; height: 1px; transform: scaleX(0); }
+    .lf-l, .lf-r { top: 0; height: 100%; width: 1px; transform: scaleY(0); }
+    .lf-t { top: 0; transform-origin: left; animation: lfx 0.7s ease 0.1s forwards; }
+    .lf-r { right: 0; transform-origin: top; animation: lfy 0.7s ease 0.5s forwards; }
+    .lf-b { bottom: 0; transform-origin: right; transform: scaleX(var(--p, 0)); transition: transform 0.4s ease; }
+    .lf-l { left: 0; transform-origin: bottom; animation: lfy 0.7s ease 1.3s forwards; }
+    @keyframes lfx { to { transform: scaleX(1); } }
+    @keyframes lfy { to { transform: scaleY(1); } }
+    .loader-word {
+      font-family: "Instrument Sans", "Helvetica Neue", sans-serif;
+      font-weight: 700; letter-spacing: -0.01em; line-height: 1.05;
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      color: #f4f2ea; text-align: center;
+      opacity: 0; animation: lfin 1.1s ease 0.75s forwards;
+    }
+    .loader-word em { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
+    @keyframes lfin { to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .loader-frame i, .loader-word { animation-duration: 0.01s; animation-delay: 0s; }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- first-load curtain: the plate draws itself, then hands off to the hero -->
+  <div id="loader">
+    <div class="loader-frame">
+      <i class="lf-t"></i><i class="lf-r"></i><i class="lf-b"></i><i class="lf-l"></i>
+      <div class="loader-word">The<br />Gl<em>it</em>ch<br />Edition</div>
+    </div>
+  </div>
 
   <!-- fixed top bar -->
   <header class="topbar">
@@ -165,33 +217,29 @@
 
   <!-- ============ FOOTER ============ -->
   <footer class="site-footer">
-    <div class="footer-brand">
-      <span class="footer-mark">GLITCH</span>
-      <span class="footer-tag">Catch what comes next</span>
-    </div>
-    <div class="footer-cols">
-      <div class="footer-col">
-        <h4>Program</h4>
-        <a href="#cohort">The Cohort</a>
-        <a href="#courses">Courses</a>
-        <a href="#partners">Partners</a>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-mark">GLITCH</span>
+        <span class="footer-tag">Catch what comes next</span>
       </div>
-      <div class="footer-col">
-        <h4>GLITCH</h4>
-        <a href="#mission">Our Mission</a>
-        <a href="#what">What is GLITCH</a>
-        <a href="#start">Start Here</a>
-      </div>
-      <div class="footer-col">
-        <h4>Connect</h4>
-        <a href="https://instagram.com" rel="noopener">Instagram</a>
-        <a href="https://linkedin.com" rel="noopener">LinkedIn</a>
-        <a href="mailto:hello@glitch.edu">hello@glitch.edu</a>
+      <div class="footer-contact">
+        <a class="footer-email" href="mailto:hello@glitch.edu">hello@glitch.edu</a>
+        <span class="footer-social">
+          <a href="https://instagram.com" rel="noopener">Instagram</a>
+          <a href="https://linkedin.com" rel="noopener">LinkedIn</a>
+        </span>
       </div>
     </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="#cohort">The Cohort</a>
+      <a href="#courses">Courses</a>
+      <a href="#partners">Partners</a>
+      <a href="#mission">Our Mission</a>
+      <a href="#start">Start Here</a>
+    </nav>
     <div class="footer-base">
-      <span>© 2026 GLITCH — a for-profit community, not an institution.</span>
-      <span><a href="#">Terms</a> · <a href="#">Privacy</a></span>
+      <span>&copy; 2026 GLITCH &mdash; a community, not an institution.</span>
+      <span><a href="#">Terms</a> &middot; <a href="#">Privacy</a></span>
     </div>
   </footer>
 
