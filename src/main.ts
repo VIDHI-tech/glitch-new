@@ -2,20 +2,6 @@ import Lenis from 'lenis';
 import * as THREE from 'three';
 import './style.css';
 
-/* ============================================================
-   GLITCH — The Glitch Edition
-
-   Stage model: NO still images. The pinned stage always shows a
-   frame of one continuous filmstrip of morph videos, scrubbed by
-   scroll. Each chapter's dark scene-block is split in two halves:
-     • first half  → the ARRIVING morph resolves (t 0.45 → 1.0)
-     • second half → the DEPARTING morph begins (t 0 → 0.45)
-   Video i ends on the exact frame video i+1 starts on, so the
-   strip is seamless. The paper blocks cover the stage, so the
-   hidden middle of each morph is never wasted under an overlay.
-   The hero stays a live 2.5D parallax scene and hard-cuts into
-   the detonation under a white flash.
-   ============================================================ */
 
 const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 1.0 });
 
@@ -68,15 +54,15 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
     let shuffleTick = 0;
     if (cyc && !calm) {
       let i = 0;
-      shuffleStart = window.setTimeout(() => {   // after the three lines have risen
+      shuffleStart = window.setTimeout(() => {
         shuffleTick = window.setInterval(() => {
           cyc.innerHTML = SHUFFLE[i++ % SHUFFLE.length];
         }, 240);
-      }, 1650);
+      }, 2250);   // after all ten lines (title + sub + index) have risen
     }
     const stopShuffle = () => { clearTimeout(shuffleStart); clearInterval(shuffleTick); };
     const START = performance.now();
-    const MIN_MS = calm ? 400 : 2600;  // long enough to close the frame and shuffle
+    const MIN_MS = calm ? 400 : 3300;  // long enough for the plate to fill in and the word to shuffle a full cycle
     const CAP_MS = 9000;               // never trap anyone behind a slow asset
     let progress = 0;
     const paint = () => bar.style.setProperty('--p', String(progress));
@@ -87,7 +73,7 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
     // if nothing ever registered with the manager, don't hang on it
     window.addEventListener('load', () => { if (progress === 0) { progress = 1; paint(); } });
 
-    const lines = [...el.querySelectorAll<HTMLElement>('.loader-word .ln')];
+    const lines = [...el.querySelectorAll<HTMLElement>('.loader-plate-copy .ln')];
     const travel = () => {
       // the frame comes to rest exactly on the hero's plate; because it carries
       // the same border and padding, the swap at the end is invisible
@@ -109,7 +95,7 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
             ln.style.transition = 'none';
             ln.style.transform = `translate(${-dx}px, ${-dy}px)`;
             void ln.offsetWidth;
-            ln.style.transition = `transform 0.9s cubic-bezier(0.65, 0, 0.2, 1) ${i * 0.08}s`;
+            ln.style.transition = `transform 0.9s cubic-bezier(0.65, 0, 0.2, 1) ${i * 0.05}s`;
             ln.style.transform = 'translate(0, 0)';
           });
         }
@@ -120,7 +106,7 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
       setTimeout(() => {
         document.body.classList.remove('is-loading');
         el.classList.add('is-gone');
-      }, calm ? 250 : 1200);
+      }, calm ? 250 : 1500);
     };
 
     const land = () => {

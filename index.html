@@ -47,8 +47,9 @@
     @keyframes lry { to { transform: scaleY(1); } }
     #loader.is-done .loader-frame b { opacity: 0; transition: opacity 0.5s ease; }
 
-    /* the frame's own edges */
-    .loader-frame i { position: absolute; background: rgba(244, 242, 234, 0.5); }
+    /* the frame's own edges — direct children only, so this doesn't also snatch
+       the roman-numeral <i> tags nested deep inside .loader-index rows */
+    .loader-frame > i { position: absolute; background: rgba(244, 242, 234, 0.5); }
     .lf-t, .lf-b { left: 0; width: 100%; height: 1px; transform: scaleX(0); }
     .lf-l, .lf-r { top: 0; height: 100%; width: 1px; transform: scaleY(0); }
     .lf-t { top: 0; transform-origin: left; animation: lrx 0.7s ease 0.1s forwards; }
@@ -57,38 +58,54 @@
     /* bottom edge is the progress bar — it closes as the hero's textures land */
     .lf-b { bottom: 0; transform-origin: left; transform: scaleX(var(--p, 0)); transition: transform 0.4s ease; }
 
-    /* sits at the plate's padding offset, so it comes to rest exactly on .hero-title */
-    .loader-word {
-      position: absolute; left: 0; top: 0;
+    /* fills the frame at the plate's own padding offset, so its content comes
+       to rest exactly on .hero-title / .hero-sub / .hero-index — the whole
+       plate is mocked up here, not just the title, so more lines travel in */
+    .loader-plate-copy {
+      position: absolute; inset: 0; overflow: hidden;
       padding: clamp(2rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5rem);
+      text-align: left; color: #f4f2ea;
+    }
+    .loader-word {
       font-family: "Instrument Sans", "Helvetica Neue", sans-serif;
       font-weight: 700; letter-spacing: -0.01em; line-height: 1.05;
       font-size: clamp(2rem, 4.5vw, 3.4rem);
-      color: #f4f2ea; text-align: left;
     }
+    .loader-sub {
+      font-family: "Instrument Serif", Georgia, serif;
+      margin-top: 1.75rem;
+      font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+      color: rgba(244, 242, 234, 0.7);
+    }
+    .loader-index {
+      list-style: none; margin-top: 1.75rem;
+      font-size: 0.9rem; font-weight: 600;
+    }
+    .loader-index i { font-style: normal; font-family: "Instrument Serif", Georgia, serif; opacity: 0.6; }
     /* each line rides up out of its own mask and drifts left into place, so the
-       wordmark arrives with motion instead of just appearing */
-    .loader-word .ln {
+       plate arrives with motion instead of just appearing — --i orders every
+       line (title, sub, index) in one shared stagger */
+    .loader-plate-copy .ln {
       display: block;
       overflow: hidden; padding-bottom: 0.09em; margin-bottom: -0.09em;
     }
-    .loader-word .ln > span {
+    .loader-plate-copy .ln > span {
       display: block;
       transform: translate(0.42em, 115%);
       animation: lwin 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: calc(0.5s + var(--i, 0) * 65ms);
     }
-    .loader-word .ln:nth-child(1) > span { animation-delay: 0.55s; }
-    .loader-word .ln:nth-child(2) > span { animation-delay: 0.67s; }
-    .loader-word .ln:nth-child(3) > span { animation-delay: 0.79s; }
+    /* an index row is a two-ended line (label / numeral) rather than plain text */
+    .loader-plate-copy .ln > span.row { display: flex; gap: 2.5rem; justify-content: space-between; }
     @keyframes lwin { to { transform: translate(0, 0); } }
-    .loader-word em { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
+    .loader-word em, .loader-index em { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
     /* on phones the plate is wide and short, so start the frame near its shape —
        otherwise a tall narrow box has to snap into a wide one */
     @media (max-width: 900px) {
       .loader-frame { width: min(34rem, 82vw); height: min(38rem, 56vh); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .loader-frame i, .loader-frame b, .loader-word .ln > span { animation-duration: 0.01s; animation-delay: 0s; }
+      .loader-frame i, .loader-frame b, .loader-plate-copy .ln > span { animation-duration: 0.01s; animation-delay: 0s; }
       .loader-frame { transition-duration: 0.2s; }
     }
   </style>
@@ -101,7 +118,24 @@
     <div class="loader-frame">
       <b class="lr-h1"></b><b class="lr-h2"></b><b class="lr-v1"></b><b class="lr-v2"></b>
       <i class="lf-t"></i><i class="lf-r"></i><i class="lf-b"></i><i class="lf-l"></i>
-      <div class="loader-word"><span class="ln"><span>The</span></span><span class="ln"><span><span class="cyc">Gl<em>it</em>ch</span></span></span><span class="ln"><span>Edition</span></span></div>
+      <div class="loader-plate-copy">
+        <div class="loader-word">
+          <span class="ln" style="--i:0"><span>The</span></span>
+          <span class="ln" style="--i:1"><span><span class="cyc">Gl<em>it</em>ch</span></span></span>
+          <span class="ln" style="--i:2"><span>Edition</span></span>
+        </div>
+        <p class="loader-sub">
+          <span class="ln" style="--i:3"><span>Knowledge is falling out of the old system.</span></span>
+          <span class="ln" style="--i:4"><span>Catch what comes next.</span></span>
+        </p>
+        <ul class="loader-index">
+          <li class="ln" style="--i:5"><span class="row"><span>What is GLITCH</span><i>I</i></span></li>
+          <li class="ln" style="--i:6"><span class="row"><span>Our Mission</span><i>II</i></span></li>
+          <li class="ln" style="--i:7"><span class="row"><span>The Cohort</span><i>III</i></span></li>
+          <li class="ln" style="--i:8"><span class="row"><span>Courses</span><i>IV</i></span></li>
+          <li class="ln" style="--i:9"><span class="row"><span>Partners</span><i>V</i></span></li>
+        </ul>
+      </div>
     </div>
   </div>
   </div>
