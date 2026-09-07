@@ -34,17 +34,49 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
 
 /* ============================================================
    First-load curtain — the plate draws itself while the hero's
-   textures arrive, then hands off to the real scene behind it.
+   textures arrive, then travels into .hero-plate and hands over.
    Hooked here, before any texture load starts, so the manager
    sees every item.
    ============================================================ */
 {
   const el = document.getElementById('loader');
+  const frame = el?.querySelector<HTMLElement>('.loader-frame');
   const bar = el?.querySelector<HTMLElement>('.lf-b');
-  if (el && bar) {
+  if (el && frame && bar) {
+    // freeze the CSS-centred start as explicit pixels — the box is laid out by
+    // the inline stylesheet, and left/top/width/height can only be transitioned
+    // from concrete values
+    const r0 = frame.getBoundingClientRect();
+    frame.style.transition = 'none';   // or it animates into its own start position
+    frame.style.transform = 'none';
+    frame.style.left = `${r0.left}px`;
+    frame.style.top = `${r0.top}px`;
+    frame.style.width = `${r0.width}px`;
+    frame.style.height = `${r0.height}px`;
+    void frame.offsetWidth;            // flush, then hand the transition back
+    frame.style.transition = '';
+
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // the middle line shuffles through words that all hide an "it" — Shopify
+    // hides "ai" in Renaissance for its AI theme, this hides "it" in words from
+    // the cohort/admissions side of GLITCH — before settling once loading is done
+    const cyc = el.querySelector<HTMLElement>('.cyc');
+    const SETTLED = 'Gl<em>it</em>ch';
+    const SHUFFLE = ['Ed<em>it</em>', 'Aud<em>it</em>', 'Recru<em>it</em>', 'Mer<em>it</em>'];
+    let shuffleStart = 0;
+    let shuffleTick = 0;
+    if (cyc && !calm) {
+      let i = 0;
+      shuffleStart = window.setTimeout(() => {   // after the three lines have risen
+        shuffleTick = window.setInterval(() => {
+          cyc.innerHTML = SHUFFLE[i++ % SHUFFLE.length];
+        }, 240);
+      }, 1650);
+    }
+    const stopShuffle = () => { clearTimeout(shuffleStart); clearInterval(shuffleTick); };
     const START = performance.now();
-    const MIN_MS = calm ? 400 : 2200;  // long enough for the frame to close
+    const MIN_MS = calm ? 400 : 2600;  // long enough to close the frame and shuffle
     const CAP_MS = 9000;               // never trap anyone behind a slow asset
     let progress = 0;
     const paint = () => bar.style.setProperty('--p', String(progress));
@@ -54,13 +86,55 @@ const maxAniso = () => renderer.capabilities.getMaxAnisotropy();
     };
     // if nothing ever registered with the manager, don't hang on it
     window.addEventListener('load', () => { if (progress === 0) { progress = 1; paint(); } });
+
+    const lines = [...el.querySelectorAll<HTMLElement>('.loader-word .ln')];
+    const travel = () => {
+      // the frame comes to rest exactly on the hero's plate; because it carries
+      // the same border and padding, the swap at the end is invisible
+      const plate = document.querySelector<HTMLElement>('.hero-plate');
+      if (plate) {
+        const r = plate.getBoundingClientRect();
+        frame.style.left = `${r.left}px`;
+        frame.style.top = `${r.top}px`;
+        frame.style.width = `${r.width}px`;
+        frame.style.height = `${r.height}px`;
+
+        // the lines are children, so they'd be carried across rigidly. Hold each
+        // one back by the frame's own displacement and release them on a stagger,
+        // so they cross one after another and still land where they must.
+        if (!calm) {
+          const dx = r.left - r0.left;
+          const dy = r.top - r0.top;
+          lines.forEach((ln, i) => {
+            ln.style.transition = 'none';
+            ln.style.transform = `translate(${-dx}px, ${-dy}px)`;
+            void ln.offsetWidth;
+            ln.style.transition = `transform 0.9s cubic-bezier(0.65, 0, 0.2, 1) ${i * 0.08}s`;
+            ln.style.transform = 'translate(0, 0)';
+          });
+        }
+      }
+      el.classList.add('is-done');
+      // hand over the instant the frame touches down: the plate appears and the
+      // stand-in leaves in the same tick, so nothing crossfades
+      setTimeout(() => {
+        document.body.classList.remove('is-loading');
+        el.classList.add('is-gone');
+      }, calm ? 250 : 1200);
+    };
+
+    const land = () => {
+      progress = 1; paint();
+      // let the word come to rest on GLITCH and be read before anything moves
+      stopShuffle();
+      if (cyc) cyc.innerHTML = SETTLED;
+      window.setTimeout(travel, calm ? 0 : 420);
+    };
+
     const tick = () => {
       const t = performance.now() - START;
-      if (t > CAP_MS || (progress >= 1 && t > MIN_MS)) {
-        progress = 1; paint();
-        el.classList.add('is-done');
-        setTimeout(() => el.classList.add('is-gone'), 1200);
-      } else requestAnimationFrame(tick);
+      if (t > CAP_MS || (progress >= 1 && t > MIN_MS)) land();
+      else requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   }

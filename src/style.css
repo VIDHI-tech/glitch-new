@@ -541,6 +541,20 @@ main { position: relative; z-index: 10; }
   .partner-slots { grid-template-columns: repeat(2, 1fr); }
   .footer-top { flex-direction: column; align-items: flex-start; }
   .footer-contact { align-items: flex-start; }
+
+  /* the course row is a nowrap flex line built for desktop widths; on a phone
+     its content needs ~350px inside ~270px, and body's overflow-x:clip would
+     silently crop the label and arrow rather than let them scroll */
+  .course-list li { flex-wrap: wrap; gap: 0.5rem 1rem; padding: 1rem 0.25rem; }
+  .course-thumb { width: 3.6rem; height: 2.5rem; }
+  .course-name { font-size: 1.25rem; min-width: 0; flex: 1 1 auto; }
+  .course-focus { margin-left: 0; flex-basis: 100%; padding-left: calc(3.6rem + 1rem); }
+  .course-arrow { display: none; }   /* reveals on hover only — dead weight on touch */
+
+  /* footer links were 17–22px tall: too small to hit reliably */
+  .footer-nav { gap: 0.15rem 1.5rem; }
+  .footer-nav a { padding: 0.65rem 0; }
+  .footer-base a { display: inline-block; padding: 0.4rem 0; }
 }
 
 /* big 4K screens: scale the rem-based chrome and keep paper content composed */
