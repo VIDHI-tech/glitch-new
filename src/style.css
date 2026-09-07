@@ -1,0 +1,533 @@
+/* ============================================================
+   GLITCH — The Glitch Edition
+   Architecture + design language: pinned WebGL stage behind a
+   tall sectioned document; dark scene blocks alternate with
+   light paper blocks; fixed left rail with chapter index.
+   ============================================================ */
+
+:root {
+  --paper: rgb(220, 220, 208);
+  --cream: #f7f7ee;
+  --ink: #111110;
+  --ink-soft: rgba(17, 17, 16, 0.6);
+  --white: #f4f2ea;
+  --white-soft: rgba(244, 242, 234, 0.7);
+  --accent: #ffd400; /* banana */
+  --sans: "Instrument Sans", "Helvetica Neue", sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --script: "Imperial Script", cursive;
+  --rail-w: 15rem;
+  --pad: clamp(1.25rem, 3.5vw, 3.5rem);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: auto; } /* Lenis owns scrolling */
+
+body {
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: var(--ink); }
+
+a { color: inherit; }
+
+/* ============ pinned WebGL stage ============ */
+.canvas-wrapper {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  margin-bottom: -100lvh;
+  overflow: clip;
+  z-index: 0;
+}
+#scene { width: 100%; height: 100%; display: block; }
+
+/* ============ fixed chrome ============ */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 90;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem var(--pad);
+  mix-blend-mode: normal;
+  pointer-events: none;
+}
+.topbar a { pointer-events: auto; }
+
+.topbar-brand {
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+.topbar-season { font-weight: 400; opacity: 0.55; margin-left: 0.35rem; }
+
+.topbar-cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.55em 1.1em;
+}
+.topbar-cta { transition: background 0.3s, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+.topbar-cta:hover { background: var(--accent); transform: translateY(-1px); }
+.topbar-cta:active { transform: translateY(0) scale(0.97); }
+
+/* left rail */
+.rail {
+  position: fixed;
+  left: var(--pad);
+  top: 0;
+  bottom: 0;
+  z-index: 80;
+  width: var(--rail-w);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4.25rem 0 1.5rem;
+  pointer-events: none;
+  font-size: 0.82rem;
+}
+.rail a { pointer-events: auto; }
+
+.rail-wordmark {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+.rail-wordmark em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+
+.rail-chapters { display: flex; flex-direction: column; gap: 0.1rem; }
+.rail-chapters a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--white-soft);
+  font-weight: 600;
+  line-height: 1.55;
+  transition: color 0.25s;
+}
+.rail-chapters a i {
+  font-style: normal;
+  font-family: var(--serif);
+  font-size: 0.72rem;
+  margin-left: auto;
+  opacity: 0.7;
+}
+.rail-chapters a span { position: relative; }
+.rail-chapters a.active { color: var(--white); }
+.rail-chapters a.active span::after {
+  content: "";
+  position: absolute;
+  left: calc(100% + 0.5rem);
+  right: -0.5rem;
+  bottom: 0.35em;
+  border-bottom: 1px dotted currentColor;
+  opacity: 0.5;
+}
+.rail-chapters a:hover { color: var(--white); }
+
+.rail-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.68rem;
+  color: var(--white-soft);
+}
+.rail-legal a { text-decoration: none; }
+
+/* fixed chrome flips to dark text over paper blocks, per zone */
+body[data-surface="paper"] .rail-chapters a { color: var(--ink-soft); }
+body[data-surface="paper"] .rail-chapters a.active,
+body[data-surface="paper"] .rail-chapters a:hover { color: var(--ink); }
+body[data-surface-top="paper"] .rail-wordmark { color: var(--ink); }
+body[data-surface-bottom="paper"] .rail-legal { color: var(--ink); }
+body[data-surface-top="paper"] .topbar-brand { color: var(--ink); }
+.rail-wordmark, .rail-legal, .rail-chapters a, .topbar-brand { transition: color 0.35s; }
+
+/* ============ document ============ */
+main { position: relative; z-index: 10; }
+
+.chapter { position: relative; }
+
+/* dark scene blocks: transparent, the WebGL stage shows through */
+.scene-block {
+  position: relative;
+  /* one screen: the arriving morph resolves in the top half, the
+     words assemble in the lower third — never an empty screen */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  padding: 6rem var(--pad) 12vh;
+  pointer-events: none;
+}
+.scene-block a { pointer-events: auto; }
+
+/* light paper CARDS: inset over the stage so the film and its
+   transitions stay visible around them (Editions-style panels) */
+.paper-block {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  margin: 7vh var(--pad) 7vh calc(var(--rail-w) + var(--pad) * 1.6);
+  padding: clamp(3.5rem, 8vh, 6rem) clamp(2rem, 4vw, 4.5rem);
+  border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+/* the travelling banana: above the paper, below the chrome */
+#traveler {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: clamp(44px, 4vw, 96px);
+  height: auto;
+  z-index: 70;
+  pointer-events: none;
+  will-change: transform, filter, clip-path;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45));
+}
+
+/* legibility over bright frames */
+.chapter-title, .statement, .hero-title, .hero-sub {
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* giant chapter titles */
+.chapter-title {
+  font-weight: 700;
+  font-size: clamp(4rem, 14vw, 13.75rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+/* serif statements with script initial */
+.statement {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4.2vw, 3.4rem);
+  line-height: 1.12;
+  max-width: 24ch;
+  margin-top: 2.5rem;
+  text-wrap: balance;
+}
+.statement::first-letter {
+  font-family: var(--script);
+  font-size: 1.45em;
+  line-height: 0.8;
+  padding-right: 0.04em;
+}
+
+/* split-text units (scroll-scrubbed by JS) */
+.ch, .wd {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+.statement .ini {
+  font-family: var(--script);
+  font-size: 1.45em;
+  line-height: 0.8;
+  padding-right: 0.04em;
+}
+.chapter-title, .hero-plate, .hero-descriptor,
+.feature, .principles li, .course-list li, .partner-slot,
+.footer-col, .footer-brand, .start-cta, .hero-index li {
+  will-change: transform, opacity;
+}
+.statement-xl { font-size: clamp(2.6rem, 6.5vw, 5.5rem); }
+
+/* chapter I: the blast hits first — a full screen of explosion
+   before the words assemble further down the section */
+#what .scene-block {
+  min-height: 150vh;
+  padding-bottom: 14vh;
+}
+
+/* ============ hero ============ */
+.hero-scene {
+  min-height: 140vh;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 14vh;
+}
+
+.hero-plate {
+  border: 1px solid rgba(244, 242, 234, 0.5);
+  padding: clamp(2rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5rem);
+  text-align: left;
+  margin-left: calc(var(--rail-w) + var(--pad));
+  background: rgba(10, 10, 8, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 900px) {
+  .hero-plate { margin-left: 0; }
+}
+
+.hero-title {
+  font-weight: 700;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.hero-title em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+
+.hero-sub {
+  font-family: var(--serif);
+  margin-top: 1.75rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  color: var(--white-soft);
+}
+
+.hero-index {
+  list-style: none;
+  margin-top: 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.hero-index li { display: flex; gap: 2.5rem; justify-content: space-between; line-height: 1.6; }
+.hero-index i { font-style: normal; font-family: var(--serif); opacity: 0.6; }
+
+.hero-descriptor {
+  position: absolute;
+  right: var(--pad);
+  bottom: 1.5rem;
+  text-align: right;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--white-soft);
+}
+
+/* ============ paper content ============ */
+.definition {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  line-height: 1.15;
+  max-width: 26ch;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: clamp(3rem, 7vh, 5rem);
+  padding-top: 2rem;
+  border-top: 1px solid rgba(17, 17, 16, 0.25);
+}
+.feature h4 { font-size: 1rem; font-weight: 700; }
+.feature p { margin-top: 0.4rem; color: var(--ink-soft); font-size: 0.95rem; }
+
+.principles { list-style: none; }
+.principles li {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 3.6vw, 3rem);
+  line-height: 1.3;
+  border-bottom: 1px solid rgba(17, 17, 16, 0.2);
+  padding: 1.1rem 0;
+}
+.principles strong { font-weight: 400; }
+.principles span { color: var(--ink-soft); font-style: italic; }
+
+.lede {
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  line-height: 1.35;
+  max-width: 38ch;
+}
+
+.course-list { list-style: none; margin-top: clamp(2.5rem, 6vh, 4rem); border-top: 1px solid rgba(17,17,16,0.35); }
+.course-list li {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.1rem 0.5rem;
+  border-bottom: 1px solid rgba(17, 17, 16, 0.2);
+  cursor: pointer;
+  transition: background 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), padding 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.course-thumb {
+  width: 4.6rem;
+  height: 3.2rem;
+  object-fit: cover;
+  filter: grayscale(0.55) sepia(0.15);
+  transform: scale(0.96);
+  transition: filter 0.4s, transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1.2), width 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.course-name { font-weight: 700; font-size: clamp(1.5rem, 3.4vw, 2.8rem); letter-spacing: -0.01em; transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.course-focus { margin-left: auto; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); }
+.course-arrow {
+  font-size: 1.4rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.course-list li:hover {
+  background: rgba(17, 17, 16, 0.05);
+  padding-left: 1.1rem;
+}
+.course-list li:hover .course-thumb { filter: none; transform: scale(1.06); width: 5.6rem; }
+.course-list li:hover .course-name { transform: translateX(4px); }
+.course-list li:hover .course-arrow { opacity: 1; transform: none; }
+
+.paper-figure {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  max-width: 900px;
+  overflow: hidden;
+}
+.paper-figure img {
+  display: block;
+  width: 100%;
+  filter: sepia(0.1);
+  transform: scale(1.04);
+  transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  box-shadow: 0 1.5rem 3rem rgba(17, 17, 16, 0.25);
+}
+.paper-figure:hover img { transform: scale(1.0); }
+
+.partner-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.partner-slot {
+  aspect-ratio: 16/10;
+  border: 1px dashed rgba(17, 17, 16, 0.35);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+/* ============ finale: the crash ============ */
+.start-scene {
+  min-height: 190vh;           /* rewind, crash, then the words */
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 24vh;
+}
+.finale-title {
+  font-family: "Anton", var(--sans);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(3.4rem, 13vw, 15rem);
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  color: #f7c948;
+  text-align: center;
+  text-shadow: none;
+  max-width: 12ch;
+}
+.finale-title .wd { display: inline-block; white-space: nowrap; }
+.finale-title .ch { display: inline-block; will-change: transform, opacity, text-shadow; }
+.finale-cta {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: clamp(1rem, 2vw, 1.7rem);
+  color: #f4f2ea;
+  text-decoration: none;
+  margin-top: 3rem;
+  padding: 0.5em 0.2em 0.35em;
+  border-bottom: 1px solid rgba(247, 201, 72, 0.55);
+  opacity: 0;
+  transform: translateY(18px);
+  transition: color 0.2s, border-color 0.2s;
+}
+.finale-cta .prompt { color: #f7c948; }
+.finale-cta .caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.05em;
+  margin-left: 0.15em;
+  vertical-align: -0.15em;
+  background: #f7c948;
+  animation: caret-blink 1s steps(1) infinite;
+}
+.finale-cta:hover, .finale-cta.caught { color: #f7c948; border-color: #f7c948; }
+@keyframes caret-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+/* ============ start (legacy) ============ */
+.start-cta {
+  margin-top: 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--cream);
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.8em 1.6em;
+}
+.start-cta:hover { background: var(--accent); }
+
+/* ============ footer ============ */
+.site-footer {
+  position: relative;
+  z-index: 10;
+  background: var(--cream);
+  color: var(--ink);
+  padding: clamp(3rem, 7vh, 5rem) var(--pad) 2rem calc(var(--rail-w) + var(--pad) * 2);
+}
+.footer-brand { display: flex; align-items: baseline; gap: 1.25rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(17,17,16,0.2); }
+.footer-mark { font-weight: 700; font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -0.02em; }
+.footer-tag { font-family: var(--serif); font-style: italic; color: var(--ink-soft); }
+.footer-cols { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 2rem; padding: 2.5rem 0; border-bottom: 1px solid rgba(17,17,16,0.2); }
+.footer-col { display: flex; flex-direction: column; gap: 0.55rem; }
+.footer-col h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); margin-bottom: 0.35rem; }
+.footer-col a { text-decoration: none; font-size: 0.95rem; width: fit-content; }
+.footer-col a:hover { text-decoration: underline; }
+.footer-base { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; padding-top: 1.5rem; font-size: 0.75rem; color: var(--ink-soft); }
+.footer-base a { text-decoration: none; }
+
+/* ============ responsive ============ */
+@media (max-width: 900px) {
+  :root { --rail-w: 0rem; }
+  .rail { display: none; }
+  .paper-block { margin-left: var(--pad); margin-right: var(--pad); }
+  .site-footer { padding-left: var(--pad); }
+  .chapter-title { white-space: normal; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .partner-slots { grid-template-columns: repeat(2, 1fr); }
+  .footer-cols { grid-template-columns: 1fr; }
+}
+
+/* big 4K screens: scale the rem-based chrome and keep paper content composed */
+@media (min-width: 2000px) {
+  html { font-size: 20px; }
+}
+@media (min-width: 3000px) {
+  html { font-size: 26px; }
+}
+.paper-block > * { max-width: 1600px; }
+@media (min-width: 3000px) {
+  .paper-block > * { max-width: 2200px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ============ after the crash, the footer lives in the same dark system ============ */
+footer.site-footer { background: #0b0b0c; color: #e8e6df; }
+footer.site-footer .footer-brand, footer.site-footer .footer-cols { border-bottom-color: rgba(232, 230, 223, 0.18); }
+footer.site-footer .footer-mark { color: #f7c948; font-family: "Anton", var(--sans); font-weight: 400; letter-spacing: 0.01em; }
+footer.site-footer .footer-tag, footer.site-footer .footer-col h4, footer.site-footer .footer-base { color: rgba(232, 230, 223, 0.6); }
+footer.site-footer .footer-col a { color: #e8e6df; }
+footer.site-footer .footer-col a:hover { color: #f7c948; }
+footer.site-footer .footer-base a { color: rgba(232, 230, 223, 0.6); }

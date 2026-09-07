@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GLITCH — Catch What Comes Next</title>
+  <meta name="description" content="GLITCH is a post-AI learning community for people building what comes next." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Imperial+Script&family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- fixed top bar -->
+  <header class="topbar">
+    <a class="topbar-brand" href="#top">GLITCH</a>
+    <div class="topbar-right">
+      <a class="topbar-cta" href="#start">Start here</a>
+    </div>
+  </header>
+
+  <!-- pinned WebGL stage: sticky 100vh, the document scrolls over it -->
+  <div class="canvas-wrapper" aria-hidden="true">
+    <canvas id="scene"></canvas>
+  </div>
+
+  <!-- fixed left column: wordmark + chapter rail + legal -->
+  <div class="rail">
+    <div class="rail-wordmark">The<br />Gl<em>it</em>ch<br />Edition</div>
+    <nav class="rail-chapters" aria-label="Chapters">
+      <a href="#what" data-chapter="what"><span>What is GLITCH</span><i>I</i></a>
+      <a href="#mission" data-chapter="mission"><span>Our Mission</span><i>II</i></a>
+      <a href="#cohort" data-chapter="cohort"><span>The Cohort</span><i>III</i></a>
+      <a href="#courses" data-chapter="courses"><span>Courses</span><i>IV</i></a>
+      <a href="#partners" data-chapter="partners"><span>Partners</span><i>V</i></a>
+    </nav>
+    <div class="rail-legal">
+      <span>© 2026 GLITCH</span>
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+    </div>
+  </div>
+
+  <!-- the one banana that travels the whole page, perch to perch -->
+  <img id="traveler" src="/assets/hero/parts/s1-08_x1424_y554_w88_h159.png" alt="" aria-hidden="true" />
+
+  <main id="top">
+    <div id="main-content">
+
+      <!-- ============ HERO ============ -->
+      <section id="hero" class="chapter">
+        <div class="scene-block hero-scene">
+          <div class="hero-plate">
+            <h1 class="hero-title">The<br />Gl<em>it</em>ch<br />Edition</h1>
+            <p class="hero-sub">Knowledge is falling out of the old system.<br />Catch what comes next.</p>
+            <ul class="hero-index">
+              <li><span>What is GLITCH</span><i>I</i></li>
+              <li><span>Our Mission</span><i>II</i></li>
+              <li><span>The Cohort</span><i>III</i></li>
+              <li><span>Courses</span><i>IV</i></li>
+              <li><span>Partners</span><i>V</i></li>
+            </ul>
+          </div>
+          <p class="hero-descriptor">Post-AI education<br />Community / Opportunity</p>
+        </div>
+      </section>
+
+      <!-- ============ I · WHAT IS GLITCH ============ -->
+      <section id="what" class="chapter">
+        <div class="scene-block">
+          <h2 class="chapter-title">What is GLITCH?</h2>
+          <p class="statement">Education was designed for a world that no longer exists.</p>
+        </div>
+        <div class="paper-block">
+          <p class="definition">GLITCH is a post-AI learning community for people building what comes next.</p>
+          <div class="feature-grid">
+            <div class="feature">
+              <h4>Learn</h4>
+              <p>what is changing.</p>
+            </div>
+            <div class="feature">
+              <h4>Build</h4>
+              <p>with people already inside it.</p>
+            </div>
+            <div class="feature">
+              <h4>Find</h4>
+              <p>support, bounties and opportunity.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ II · OUR MISSION ============ -->
+      <section id="mission" class="chapter">
+        <div class="scene-block">
+          <h2 class="chapter-title">Our Mission</h2>
+          <p class="statement">Rebuild education for what comes next.</p>
+        </div>
+        <div class="paper-block">
+          <ul class="principles">
+            <li><strong>A community,</strong> <span>not an institution.</span></li>
+            <li><strong>Live cohorts,</strong> <span>not a course library.</span></li>
+            <li><strong>Bounties,</strong> <span>not certificates.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ III · THE COHORT ============ -->
+      <section id="cohort" class="chapter">
+        <div class="scene-block">
+          <h2 class="chapter-title">The Cohort</h2>
+          <p class="statement">One program at a time.</p>
+        </div>
+        <div class="paper-block">
+          <p class="lede">Live sessions and build labs, mixed. You ship inside the cohort, and what you ship is what opens the door.</p>
+          <figure class="paper-figure">
+            <img src="/assets/banana/ch3-cohort.jpg" alt="" loading="lazy" />
+          </figure>
+        </div>
+      </section>
+
+      <!-- ============ IV · COURSES ============ -->
+      <section id="courses" class="chapter">
+        <div class="scene-block">
+          <h2 class="chapter-title">Courses</h2>
+          <p class="statement">Choose your path.</p>
+        </div>
+        <div class="paper-block">
+          <p class="lede">Every course runs inside the cohort — live sessions, build labs, and a brief you actually ship.</p>
+          <ul class="course-list">
+            <li><img class="course-thumb" src="/assets/banana/ch1-blast.jpg" alt="" loading="lazy" /><span class="course-name">Foundations</span><span class="course-focus">Post-AI</span><span class="course-arrow" aria-hidden="true">→</span></li>
+            <li><img class="course-thumb" src="/assets/banana/ch2-tower.jpg" alt="" loading="lazy" /><span class="course-name">Tech &amp; Code</span><span class="course-focus">The New Stack</span><span class="course-arrow" aria-hidden="true">→</span></li>
+            <li><img class="course-thumb" src="/assets/banana/ch4-courses.jpg" alt="" loading="lazy" /><span class="course-name">AI &amp; Design</span><span class="course-focus">Taste &amp; Tools</span><span class="course-arrow" aria-hidden="true">→</span></li>
+            <li><img class="course-thumb" src="/assets/banana/ch3-cohort.jpg" alt="" loading="lazy" /><span class="course-name">Creativity Zone</span><span class="course-focus">Make Things</span><span class="course-arrow" aria-hidden="true">→</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ V · PARTNERS ============ -->
+      <section id="partners" class="chapter">
+        <div class="scene-block">
+          <h2 class="chapter-title">Our Partners</h2>
+        </div>
+        <div class="paper-block">
+          <div class="partner-slots">
+            <div class="partner-slot">To be announced</div>
+            <div class="partner-slot">To be announced</div>
+            <div class="partner-slot">To be announced</div>
+            <div class="partner-slot">To be announced</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ START ============ -->
+      <!-- the Renaissance illusion crashes; the raw system underneath speaks -->
+      <section id="start" class="chapter chapter-finale">
+        <div class="scene-block start-scene">
+          <h2 class="finale-title">Catch what comes next.</h2>
+          <a class="finale-cta" href="mailto:hello@glitch.edu"><span class="prompt" aria-hidden="true">&gt;&nbsp;</span>hello@glitch.edu<span class="caret" aria-hidden="true"></span></a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <span class="footer-mark">GLITCH</span>
+      <span class="footer-tag">Catch what comes next</span>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Program</h4>
+        <a href="#cohort">The Cohort</a>
+        <a href="#courses">Courses</a>
+        <a href="#partners">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>GLITCH</h4>
+        <a href="#mission">Our Mission</a>
+        <a href="#what">What is GLITCH</a>
+        <a href="#start">Start Here</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a href="https://instagram.com" rel="noopener">Instagram</a>
+        <a href="https://linkedin.com" rel="noopener">LinkedIn</a>
+        <a href="mailto:hello@glitch.edu">hello@glitch.edu</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>© 2026 GLITCH — a for-profit community, not an institution.</span>
+      <span><a href="#">Terms</a> · <a href="#">Privacy</a></span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
